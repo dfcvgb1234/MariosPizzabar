@@ -6,15 +6,17 @@ public class Main {
     //Declarations
     private static int menuCount = 0;
     private static ArrayList<Item> menuList = new ArrayList<Item>();
-    private static ArrayList<String> orderLines = new ArrayList<String>();
+    private static ArrayList<Item> orderLines = new ArrayList<Item>();
+    private static ArrayList<Item> orderList = new ArrayList<Item>();
+    private static ArrayList<Item> activeOrders = new ArrayList<Item>();
 
     public static void main(String[] args) {
         loadMenu();
-        menu0();
+        mainMenu();
     }
 
     //Main menu
-    public static void menu0 () {
+    public static void mainMenu () {
         //Clears screen
         clearScreen();
         //Layout
@@ -33,27 +35,27 @@ public class Main {
         int menuChoice = console.nextInt();
         switch (menuChoice) {
             case 1:
-                menu1();
+                menu();
             case 2:
-                //newOrder();
+                newOrder();
             case 3:
-                //activeOrders();
+                activeOrders();
             case 4:
-                //allOrders();
+                allOrders();
             case 5:
-                //statistics();
+                statistics();
             case 0:
                 System.out.println("Afslutter program...");
                 System.exit(0);
             default:
                 System.out.println("Input ikke accepteret, prøv igen.");
                 wait(2000);
-                menu0();
+                mainMenu();
         }
     }
 
     //Menu
-    public static void menu1 () {
+    public static void menu () {
         //Clears screen
         clearScreen();
         //Layout
@@ -80,11 +82,11 @@ public class Main {
             case 2:
                 removeDish();
             case 0:
-                menu0();
+                mainMenu();
             default:
                 System.out.println("Input ikke accepteret, prøv igen.");
                 wait(2000);
-                menu1();
+                menu();
         }
     }
 
@@ -107,7 +109,7 @@ public class Main {
         wait(2000);
         //Saves menu and returns
         saveMenu();
-        menu1();
+        menu();
     }
 
     //Saves menu to file
@@ -160,7 +162,7 @@ public class Main {
         wait(2000);
         //Saves menu and returns
         saveMenu();
-        menu1();
+        menu();
     }
 
     //Wait timer after wrong input or message
@@ -182,8 +184,51 @@ public class Main {
     }
 
     public static void newOrder () {
+        //Clears screen
+        clearScreen();
+        //Layout
+        System.out.println("+---Ny ordre--------------------------------+");
+        System.out.println("|                                           |");
+        System.out.println("| Tryk 1 for at tilføje ret til ordren      |");
+        System.out.println("| Tryk 2 for at bekræfte ordren             |");
+        System.out.println("| Tryk 0 for hovedmenu                      |");
+        System.out.println("|                                           |");
+        System.out.println("+-------------------------------------------+");
+        //Switch for user input
+        Scanner console = IO.keyboard();
+        int menuChoice = console.nextInt();
+        switch (menuChoice) {
+            case 1:
+                addLine();
+            case 2:
+                if (orderLines.isEmpty()) {
+                    System.out.println("Ordren er tom.");
+                    wait(2000);
+                    mainMenu();
+                }
+                else {
+                    confirmOrder();
+                }
+            case 0:
+                orderLines = null;
+                System.out.println("Ordren er slettet.");
+                wait(2000);
+                mainMenu();
+        }
+    }
+
+    public static void addLine () {
+        Scanner console = IO.keyboard();
+        System.out.println("Indtast nummeret på en retten:");
+        int dish = console.nextInt();
+        System.out.println("Indtast antal:");
+        int amount = console.nextInt();
+        for (int i = 1; i <= amount; i++) {
+            orderLines.add(menuList.get(dish));
+        }
 
     }
+
 
     public static void activeOrders () {
 

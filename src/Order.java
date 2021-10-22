@@ -16,16 +16,11 @@ public class Order implements Serializable {
     }
 
     //Print format for order
-    public String printOrder () {
-        return "Order: " + orderID + "\n" + "-------------------" + "\n" + orderLines() + "-------------------" + "\n" + "Total: " + total + " DKK" + "\n\n";
+    public void printOrder () {
+
     }
 
-    //Preparation of items on order
-    private String orderLines () {
-        for (int i = 0; i < orderLines.size(); i++) {
-            System.out.println(orderLines.get(i));
-        }
-        return "";
-    }
+
+
 
 }
