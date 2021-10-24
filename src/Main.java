@@ -229,6 +229,9 @@ public class Main {
 
     }
 
+    public static void confirmOrder() {
+
+    }
 
     public static void activeOrders () {
 
