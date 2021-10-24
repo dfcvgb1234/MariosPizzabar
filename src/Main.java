@@ -1,18 +1,13 @@
-import java.io.*;
+import menu.Item;
+import menu.Menu;
+import orders.Orders;
+
 import java.util.*;
 
 public class Main {
 
-    //Declarations
-    private static int menuCount = 0;
-    private static ArrayList<Item> menuList = new ArrayList<Item>();
-    private static ArrayList<Item> orderLines = new ArrayList<Item>();
-    private static ArrayList<Item> orderList = new ArrayList<Item>();
-    private static ArrayList<Item> activeOrders = new ArrayList<Item>();
-
     public static void main(String[] args) {
-        loadMenu();
-        mainMenu();
+        activeOrders();
     }
 
     //Main menu
@@ -36,21 +31,28 @@ public class Main {
         switch (menuChoice) {
             case 1:
                 menu();
+                break;
             case 2:
                 newOrder();
+                break;
             case 3:
                 activeOrders();
+                break;
             case 4:
                 allOrders();
+                break;
             case 5:
                 statistics();
+                break;
             case 0:
                 System.out.println("Afslutter program...");
                 System.exit(0);
+                break;
             default:
                 System.out.println("Input ikke accepteret, prøv igen.");
                 wait(2000);
                 mainMenu();
+                break;
         }
     }
 
@@ -65,29 +67,29 @@ public class Main {
         System.out.println("| Tryk 2 for at fjerne en ret               |");
         System.out.println("| Tryk 0 for hovedmenu                      |");
         System.out.println("|                                           |");
-        System.out.println("+-------------------------------------------+");
-        //Prints menu
-        for (int i = 0; i < menuList.size(); i++) {
-            Item next = menuList.get(i);
-            int menuNumber = i + 1;
-            System.out.println();
-            System.out.println(next.printItem(menuNumber));
+        if (Menu.getInstance().getMenuItems().size() != 0) {
+            System.out.println("+---List------------------------------------+");
+            showMenu();
         }
+        System.out.println("+-------------------------------------------+");
         //Switch for inputs
         Scanner console = IO.keyboard();
         int menuChoice = console.nextInt();
         switch (menuChoice) {
             case 1:
                 addDish();
+                break;
             case 2:
                 removeDish();
+                break;
             case 0:
                 mainMenu();
+                break;
             default:
                 System.out.println("Input ikke accepteret, prøv igen.");
                 wait(2000);
-                menu();
         }
+        menu();
     }
 
     //Adds a dish to the menu
@@ -101,51 +103,10 @@ public class Main {
         System.out.println("Indtast rettens pris i DKK:");
         int price = console.nextInt();
         //Creates new object and adds to array list
-        Item newItem = new Item(name, description, price);
-        menuList.add(newItem);
-        menuCount++;
+        Menu.getInstance().addDish(new Item(name, description, price));
         //Messages user
         System.out.println("Retten er blevet tilføjet til menuen.");
         wait(2000);
-        //Saves menu and returns
-        saveMenu();
-        menu();
-    }
-
-    //Saves menu to file
-    public static void saveMenu () {
-        try {
-            FileOutputStream fos = new FileOutputStream("menu.ser");
-            ObjectOutputStream oos = new ObjectOutputStream(fos);
-            oos.writeInt(menuCount);
-            for (int i = 0; i < menuCount; i++) {
-                oos.writeObject(menuList.get(i));
-            }
-            oos.close();
-            fos.close();
-        }
-        catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    //Loads menu from file
-    public static void loadMenu () {
-        try {
-            FileInputStream fis = new FileInputStream("menu.ser");
-            ObjectInputStream ois = new ObjectInputStream(fis);
-            menuCount = ois.readInt();
-            for (int i = 0; i < menuCount; i++) {
-                Item next = (Item) ois.readObject();
-                menuList.add(next);
-            }
-            ois.close();
-            fis.close();
-        }
-        catch (IOException | ClassNotFoundException e) {
-            e.printStackTrace();
-        }
-
     }
 
     //Removes a dish from menu
@@ -154,15 +115,10 @@ public class Main {
         Scanner console = IO.keyboard();
         System.out.println("Indtast nummeret på den ret du vil fjerne:");
         int number = console.nextInt();
-        //Removes dish from array list
-        menuList.remove(number - 1);
-        menuCount--;
+        Menu.getInstance().removeDish(number-1);
         //Messages user
         System.out.println("Retten er blevet fjernet fra menuen.");
         wait(2000);
-        //Saves menu and returns
-        saveMenu();
-        menu();
     }
 
     //Wait timer after wrong input or message
@@ -183,57 +139,131 @@ public class Main {
         }
     }
 
-    public static void newOrder () {
-        //Clears screen
-        clearScreen();
-        //Layout
-        System.out.println("+---Ny ordre--------------------------------+");
-        System.out.println("|                                           |");
-        System.out.println("| Tryk 1 for at tilføje ret til ordren      |");
-        System.out.println("| Tryk 2 for at bekræfte ordren             |");
-        System.out.println("| Tryk 0 for hovedmenu                      |");
-        System.out.println("|                                           |");
-        System.out.println("+-------------------------------------------+");
-        //Switch for user input
-        Scanner console = IO.keyboard();
-        int menuChoice = console.nextInt();
-        switch (menuChoice) {
-            case 1:
-                addLine();
-            case 2:
-                if (orderLines.isEmpty()) {
-                    System.out.println("Ordren er tom.");
-                    wait(2000);
-                    mainMenu();
-                }
-                else {
-                    confirmOrder();
-                }
-            case 0:
-                orderLines = null;
-                System.out.println("Ordren er slettet.");
-                wait(2000);
-                mainMenu();
-        }
+    public static void showMenu() {
+        System.out.println(Menu.getInstance().toString());
     }
 
-    public static void addLine () {
+    public static void newOrder () {
+        ArrayList<Item> orderLines = new ArrayList<>();
+        int totalAmount = 0;
+
+        boolean orderComplete = false;
+
+        while (!orderComplete) {
+            //Clears screen
+            clearScreen();
+            //Layout
+            System.out.println("+---Ny ordre--------------------------------+");
+            System.out.println("|                                           |");
+            System.out.println("| Tryk 1 for at tilføje ret til ordren      |");
+            System.out.println("| Tryk 2 for at bekræfte ordren             |");
+            System.out.println("| Tryk 0 for at komme tilbage               |");
+            System.out.println("|                                           |");
+            System.out.println("+-------------------------------------------+");
+            //Switch for user input
+            Scanner console = IO.keyboard();
+            int menuChoice = console.nextInt();
+            switch (menuChoice) {
+                case 1:
+                    List<Item> lines = addLines();
+                    for (Item item : lines) {
+                        totalAmount += item.getPrice();
+                    }
+                    orderLines.addAll(lines);
+                    break;
+                case 2:
+                    if (orderLines.isEmpty()) {
+                        System.out.println("Ordren er tom.");
+                        wait(2000);
+                    }
+                    else {
+                        confirmOrder(orderLines, totalAmount);
+                        orderComplete = true;
+                        return;
+                    }
+                    break;
+                case 0:
+                    wait(2000);
+                    return;
+                default:
+                    System.out.println("Input ikke accepteret, prøv igen.");
+                    wait(2000);
+                    break;
+            }
+        }
+        newOrder();
+    }
+
+    public static List<Item> addLines () {
+        List<Item> lines = new ArrayList<>();
         Scanner console = IO.keyboard();
         System.out.println("Indtast nummeret på en retten:");
         int dish = console.nextInt();
         System.out.println("Indtast antal:");
         int amount = console.nextInt();
         for (int i = 1; i <= amount; i++) {
-            orderLines.add(menuList.get(dish));
+            lines.add(Menu.getInstance().getMenuItems().get(dish-1));
         }
-
+        return lines;
     }
 
-    public static void confirmOrder() {
-
+    public static void confirmOrder(ArrayList<Item> orderLines, int total) {
+        Orders.getInstance().addActiveOrder(orderLines, total);
     }
 
     public static void activeOrders () {
+        if (Orders.getInstance().getActiveOrders().size() != 0) {
+            System.out.println("+---Ordre-----------------------------------+");
+            showOrders();
+        }
+        System.out.println("+---Handlinger------------------------------+");
+        System.out.println("|                                           |");
+        System.out.println("| Tryk 1 for at tilføje en ordre            |");
+        System.out.println("| Tryk 2 for at fjerne en ordre             |");
+        System.out.println("| Tryk 0 for hovedmenu                      |");
+        System.out.println("|                                           |");
+        System.out.println("+-------------------------------------------+");
+
+        //Switch for user input
+        Scanner console = IO.keyboard();
+        int menuChoice = console.nextInt();
+        switch (menuChoice) {
+            case 1:
+                newOrder();
+                break;
+            case 2:
+                if (Orders.getInstance().getActiveOrders().isEmpty()) {
+                    System.out.println("Der er ikke nogen aktive ordrer");
+                    wait(1000);
+                }
+                else {
+                    removeOrder();
+                }
+                break;
+            case 0:
+                wait(1000);
+                mainMenu();
+                break;
+            default:
+                System.out.println("Input ikke accepteret, prøv igen.");
+                wait(2000);
+                break;
+        }
+        activeOrders();
+    }
+
+    public static void showOrders() {
+        System.out.println(Orders.getInstance().printActiveOrders());
+    }
+
+    public static void removeOrder() {
+        Scanner console = IO.keyboard();
+        System.out.println("Indtast id på den ordre du gerne vil have fjernet:");
+        int id = console.nextInt();
+
+        if (Orders.getInstance().hasActiveOrderID(id)) {
+            Orders.getInstance().removeActiveOrder(id);
+        }
 
     }
 

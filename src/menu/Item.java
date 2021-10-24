@@ -1,3 +1,5 @@
+package menu;
+
 import java.io.*;
 
 public class Item implements Serializable {
@@ -14,9 +16,9 @@ public class Item implements Serializable {
         this.price = price;
     }
 
-    //Print format for items
-    public String printItem (int menuNumber) {
-        return String.format("%-2d . %-20s\n%-35s%-2d DKK", menuNumber, name,description, price);
+    @Override
+    public String toString() {
+        return String.format("| %-10s | %-40s | %-5s DKK |", name,description, price);
     }
 
     //Getters
