@@ -7,12 +7,17 @@ import java.util.*;
 public class Main {
 
     public static void main(String[] args) {
-        activeOrders();
+        if (!Menu.getInstance().getMenuItems().isEmpty()) {
+            activeOrders();
+        }
+        else {
+            mainMenu();
+        }
     }
 
     //Main menu
     public static void mainMenu () {
-        //Clears screen
+        //Clears screen1
         clearScreen();
         //Layout
         System.out.println("+---Hovedmenu-------------------------------+");
@@ -165,12 +170,14 @@ public class Main {
             int menuChoice = console.nextInt();
             switch (menuChoice) {
                 case 1:
-                    List<Item> lines = addLines();
-                    for (Item item : lines) {
-                        totalAmount += item.getPrice();
+                    if (!Menu.getInstance().getMenuItems().isEmpty()) {
+                        List<Item> lines = addLines();
+                        for (Item item : lines) {
+                            totalAmount += item.getPrice();
+                        }
+                        orderLines.addAll(lines);
+                        break;
                     }
-                    orderLines.addAll(lines);
-                    break;
                 case 2:
                     if (orderLines.isEmpty()) {
                         System.out.println("Ordren er tom.");
